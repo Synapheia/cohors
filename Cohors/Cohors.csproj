@@ -4,7 +4,24 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageId>Synapheia.$(AssemblyName)</PackageId>
+        <Title>Cohors</Title>
+        <Authors>LST Systems</Authors>
+        <Description>A common configuration library for Synapheia systems</Description>
+        <Copyright>2024</Copyright>
+        <RepositoryUrl>https://github.com/Synapheia/cohors</RepositoryUrl>
+        <PackageTags>LSTSystems Synapheia</PackageTags>
+        <PackageReleaseNotes>Initial Release</PackageReleaseNotes>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
+
+    <ItemGroup>
+      <None Include="..\README.md">
+        <Pack>True</Pack>
+        <PackagePath>\</PackagePath>
+      </None>
+    </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
