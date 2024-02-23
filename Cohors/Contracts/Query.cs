@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Cohors.Contracts;
 
-public sealed class Queries<T> where T : class
+public sealed class Query<T> where T : class
 {
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T? Data { get; set; } = default(T);
@@ -14,4 +14,5 @@ public sealed class Queries<T> where T : class
     public string? SearchBy { get; set; }
     public string? FilterBy { get; set; }
     public string? FilterValue { get; set; }
+    public int  TotalPages { get; set; } = 1;
 }
