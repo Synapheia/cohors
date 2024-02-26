@@ -36,6 +36,13 @@ public class ExceptionFilter(ILogger<ExceptionFilter> logger) : IExceptionFilter
             context.Result = new JsonResult(error) { StatusCode = (int)httpException.StatusCode };
             logger.LogWarning("{message}", context.Exception.Message);
         }
+        else if (context.Exception.GetType().IsGenericType && 
+                 context.Exception.GetType().GetGenericTypeDefinition() == typeof(NotFoundException<>))
+        {
+            var error = new ErrorDto(context.Exception.Message, HttpStatusCode.NotFound.ToString());
+            context.Result = new JsonResult(error) { StatusCode = (int)HttpStatusCode.NotFound };
+            logger.LogWarning(context.Exception, "{message}", context.Exception.Message);
+        }
         else
         {
             var error = new ErrorDto(context.Exception.Message, HttpStatusCode.InternalServerError.ToString());
