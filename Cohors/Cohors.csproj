@@ -14,7 +14,7 @@
         <PackageTags>LSTSystems Synapheia</PackageTags>
         <PackageReleaseNotes>Initial Release</PackageReleaseNotes>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <Version>1.0.1</Version>
+        <Version>1.0.2</Version>
     </PropertyGroup>
 
     <ItemGroup>

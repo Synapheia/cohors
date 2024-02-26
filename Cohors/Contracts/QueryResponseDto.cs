@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Cohors.Contracts;
 
-public sealed class Query<T> where T : class
+public sealed class QueryResponseDto<T> where T : class
 {
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T? Data { get; set; } = default(T);
