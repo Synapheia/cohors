@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using Cohors.Contracts;
-using Cohors.Exceptions;
+using Cohors.Handlers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
@@ -8,46 +8,37 @@ using Microsoft.Extensions.Logging;
 namespace Cohors.Filters;
 
 /// <summary>
-///     Filter used to handle exceptions that occur during the execution of an action method.
+/// Represents a filter that handles exceptions thrown during the execution of a controller action or another filter.
 /// </summary>
 public class ExceptionFilter(ILogger<ExceptionFilter> logger) : IExceptionFilter
 {
     /// <summary>
-    ///     Handles exceptions that occur during the execution of an action.
-    ///     This method checks if the exception is an HttpException, and if so, it creates an ErrorDto object with the error
-    ///     message and status
-    ///     code from the exception.
-    ///     The ErrorDto object is then returned as a JsonResult with the corresponding status code.
-    ///     If the exception is not an HttpException, a new ErrorDto object is created with the exception message and the
-    ///     status
-    ///     code set to
-    ///     InternalServerError.
-    ///     The ErrorDto object is again returned as a JsonResult with the corresponding status code.
-    ///     Additionally, a log message is written to the logger with the warning level if the exception is an HttpException,
-    ///     or with the
-    ///     error level if it is not.
+    /// List of handlers that can handle different types of exceptions.
     /// </summary>
-    /// <param name="context">The ExceptionContext object that contains information about the exception and the current action.</param>
+    private readonly List<IExceptionHandler> _handlers =
+    [
+        new HttpExceptionHandler(),
+        new NotFoundExceptionHandler()
+    ];
+
+    /// <summary>
+    /// Called after an action has thrown an <see cref="System.Exception"/>.
+    /// </summary>
+    /// <param name="context">The <see cref="ExceptionContext"/>.</param>
     public void OnException(ExceptionContext context)
     {
-        if (context.Exception is HttpException httpException)
+        // Iterates over the exception handlers to find a handler that can handle the current exception.
+        foreach (var handler in _handlers.Where(handler => handler.CanHandle(context.Exception)))
         {
-            var error = new ErrorDto(httpException.Message, httpException.StatusCode.ToString());
-            context.Result = new JsonResult(error) { StatusCode = (int)httpException.StatusCode };
-            logger.LogWarning("{message}", context.Exception.Message);
-        }
-        else if (context.Exception.GetType().IsGenericType && 
-                 context.Exception.GetType().GetGenericTypeDefinition() == typeof(NotFoundException<>))
-        {
-            var error = new ErrorDto(context.Exception.Message, HttpStatusCode.NotFound.ToString());
-            context.Result = new JsonResult(error) { StatusCode = (int)HttpStatusCode.NotFound };
-            logger.LogWarning(context.Exception, "{message}", context.Exception.Message);
-        }
-        else
-        {
-            var error = new ErrorDto(context.Exception.Message, HttpStatusCode.InternalServerError.ToString());
-            context.Result = new JsonResult(error) { StatusCode = (int)HttpStatusCode.InternalServerError };
+            var (error, statusCode) = handler.Handle(context.Exception);
+            context.Result = new JsonResult(error) { StatusCode = (int)statusCode };
             logger.LogError(context.Exception, "{message}", context.Exception.Message);
+            return;
         }
+        
+        // If no handler is found, a default error is returned.
+        var defaultError = new ErrorDto(context.Exception.Message, HttpStatusCode.InternalServerError.ToString());
+        context.Result = new JsonResult(defaultError) { StatusCode = (int)HttpStatusCode.InternalServerError };
+        logger.LogError(context.Exception, "{message}", context.Exception.Message);
     }
 }
