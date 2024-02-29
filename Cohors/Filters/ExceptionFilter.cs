@@ -41,4 +41,14 @@ public class ExceptionFilter(ILogger<ExceptionFilter> logger) : IExceptionFilter
         context.Result = new JsonResult(defaultError) { StatusCode = (int)HttpStatusCode.InternalServerError };
         logger.LogError(context.Exception, "{message}", context.Exception.Message);
     }
+    
+    /// <summary>
+    ///   Adds a handler to the list of handlers.
+    ///  Used to extend the list of handlers.
+    ///   <param name="handler">The handler to add.</param>
+    /// </summary>
+    public void AddHandler(IExceptionHandler handler)
+    {
+        _handlers.Add(handler);
+    }
 }
